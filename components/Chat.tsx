@@ -1,6 +1,7 @@
 import { Fonts } from "@/constants/Fonts";
 import React from "react";
 import { Pressable, StyleSheet, Text, View } from "react-native";
+import Avatar from "./Avatar";
 
 const Chat = () => {
   return (
@@ -13,9 +14,7 @@ const Chat = () => {
       ]}
     >
       <View style={styles.userWrapper}>
-        <View style={styles.avatar}>
-          <Text style={styles.avatarText}>rn</Text>
-        </View>
+        <Avatar text="rn" />
         <View>
           <Text style={styles.userName}>Robert Ngabo</Text>
           <Text style={styles.message}>come up , i'm at cafe</Text>
@@ -38,19 +37,6 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     gap: 10,
     alignItems: "center",
-  },
-  avatar: {
-    width: 60,
-    height: 60,
-    borderRadius: 60 / 2,
-    backgroundColor: "lightgrey",
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  avatarText: {
-    fontSize: 20,
-    fontFamily: Fonts.medium,
-    textTransform: "uppercase",
   },
   userName: {
     fontSize: 18,
