@@ -1,17 +1,28 @@
+import Chat from "@/components/Chat";
+import { Fonts } from "@/constants/Fonts";
 import { StatusBar } from "expo-status-bar";
-import { Text, View } from "react-native";
+import { StyleSheet, Text, View } from "react-native";
 
 export default function Index() {
   return (
     <View
       style={{
         flex: 1,
-        justifyContent: "center",
-        alignItems: "center",
+        paddingHorizontal: 20,
+        paddingVertical: 5,
       }}
     >
-      <Text>hello world</Text>
+      <Text style={styles.title}>Chats</Text>
+      <Chat />
       <StatusBar style="dark" />
     </View>
   );
 }
+
+const styles = StyleSheet.create({
+  title: {
+    fontSize: 27,
+    fontFamily: Fonts.semiBold,
+    paddingBottom: 30,
+  },
+});
