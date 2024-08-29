@@ -21,10 +21,10 @@ function Avatar({ text, color, size }: Props) {
     lg: 50,
   };
 
-  const selectedSizeStyle = size ? sizeStyle[size] : sizeStyle.sm;
+  const selectedSizeStyle = size ? sizeStyle[size] : sizeStyle.md;
   const selectedTextSize = size
     ? { fontSize: avatarTextSize[size] }
-    : { fontSize: avatarTextSize.sm };
+    : { fontSize: avatarTextSize.md };
 
   const avatarColor = color
     ? { backgroundColor: color }
@@ -41,14 +41,14 @@ function Avatar({ text, color, size }: Props) {
 
 const styles = StyleSheet.create({
   avatarSm: {
-    width: 60,
-    height: 60,
-    borderRadius: 60 / 2,
+    width: 40,
+    height: 40,
+    borderRadius: 40 / 2,
   },
   avatarMd: {
-    width: 80,
-    height: 80,
-    borderRadius: 80 / 2,
+    width: 65,
+    height: 65,
+    borderRadius: 65 / 2,
   },
   avatarLg: {
     width: 150,

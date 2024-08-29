@@ -1,7 +1,7 @@
-import { Colors } from '@/constants/Colors';
-import AntDesign from '@expo/vector-icons/AntDesign';
-import { Link, Tabs } from 'expo-router';
-import { Pressable } from 'react-native';
+import { Colors } from "@/constants/Colors";
+import AntDesign from "@expo/vector-icons/AntDesign";
+import { Link, Tabs } from "expo-router";
+import { Pressable } from "react-native";
 
 export default function TabsLayout() {
   return (
@@ -13,18 +13,19 @@ export default function TabsLayout() {
       <Tabs.Screen
         name="index"
         options={{
+          headerTitle: "Chats",
           tabBarShowLabel: false,
           headerTitleStyle: {
-            display: 'none',
+            display: "none",
           },
           headerStyle: {
-            backgroundColor: 'transparent',
+            backgroundColor: "transparent",
           },
           tabBarIcon: ({ color, size }) => (
             <AntDesign name="home" size={size} color={color} />
           ),
           headerRight: () => (
-            <Link href={'/chat/new'} asChild>
+            <Link href={"/chat/new"} asChild>
               <Pressable hitSlop={20} style={{ paddingHorizontal: 15 }}>
                 <AntDesign name="pluscircle" size={26} color={Colors.primary} />
               </Pressable>

@@ -13,7 +13,7 @@ export default function Index() {
       }}
     >
       <Text style={styles.title}>Chats</Text>
-      <Chat />
+      <Chat to="/chat/134" />
       <StatusBar style="dark" />
     </View>
   );

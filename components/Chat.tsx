@@ -1,29 +1,35 @@
 import { Fonts } from "@/constants/Fonts";
+import { Href, Link } from "expo-router";
 import React from "react";
 import { Pressable, StyleSheet, Text, View } from "react-native";
 import Avatar from "./Avatar";
 
-const Chat = () => {
+type Props = {
+  to: Href;
+};
+
+const Chat = ({ to }: Props) => {
   return (
-    <Pressable
-      style={({ pressed }) => [
-        {
-          backgroundColor: pressed ? "#F0F0F0" : "transparent",
-        },
-        styles.container,
-      ]}
-    >
-      <View style={styles.userWrapper}>
-        <Avatar text="rn" />
-        <View>
-          <Text style={styles.userName}>Robert Ngabo</Text>
-          <Text style={styles.message}>come up , i'm at cafe</Text>
+    <Link href={to} asChild style={styles.container}>
+      <Pressable
+        style={({ pressed }) => [
+          {
+            backgroundColor: pressed ? "#F0F0F0" : "transparent",
+          },
+        ]}
+      >
+        <View style={styles.userWrapper}>
+          <Avatar text="rn" />
+          <View>
+            <Text style={styles.userName}>Robert Ngabo</Text>
+            <Text style={styles.message}>come up , i'm at cafe</Text>
+          </View>
         </View>
-      </View>
-      <View>
-        <Text style={styles.timestamp}>2 minutes ago</Text>
-      </View>
-    </Pressable>
+        <View>
+          <Text style={styles.timestamp}>2 minutes ago</Text>
+        </View>
+      </Pressable>
+    </Link>
   );
 };
 

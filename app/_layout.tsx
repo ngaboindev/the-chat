@@ -37,6 +37,14 @@ export default function RootLayout() {
           animation: "slide_from_bottom",
         }}
       />
+      <Stack.Screen
+        name="chat/[chatId]"
+        options={{
+          headerShown: true,
+          title: "",
+          headerBackTitleVisible: false,
+        }}
+      />
     </Stack>
   );
 }
