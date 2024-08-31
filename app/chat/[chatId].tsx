@@ -3,7 +3,7 @@ import { Colors } from "@/constants/Colors";
 import { Fonts } from "@/constants/Fonts";
 import { HeaderBackButton } from "@react-navigation/elements";
 import { useNavigation } from "expo-router";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import {
   SafeAreaView,
   ScrollView,
@@ -13,8 +13,18 @@ import {
   View,
 } from "react-native";
 
+let messages = [
+  {
+    id: 1,
+    text: "Hello Robert, this is amazing i can message u using bluetooth",
+    sent: true,
+  },
+  { id: 2, text: "Glad you like it! Let’s keep testing.", sent: false },
+];
+
 const ChatScreen = () => {
-  // const params = useLocalSearchParams();
+  const [sentMessage, setSentMessage] = useState<string>("");
+  const [messagesList, setMessagesList] = useState<any[]>([]);
 
   const navigation = useNavigation();
 
@@ -39,15 +49,49 @@ const ChatScreen = () => {
     });
   }, [navigation]);
 
+  useEffect(() => {
+    setMessagesList(messages);
+  }, []);
+
+  const handleSentMessageChange = (text: string) => {
+    setSentMessage(text);
+    setMessagesList([
+      ...messagesList,
+      { id: messagesList.length + 1, text, sent: true },
+    ]);
+  };
+
   return (
     <SafeAreaView style={styles.container}>
       <ScrollView contentContainerStyle={styles.chatsContainer}>
-        <View style={styles.chatMessageContainer}>
-          <Text style={styles.chatMessageText}>Chat Screen</Text>
-        </View>
+        {messagesList.map((message) => (
+          <View
+            key={message.id}
+            style={[
+              styles.chatMessageContainer,
+              message.sent ? styles.sentMessage : styles.receivedMessage,
+            ]}
+          >
+            <Text
+              style={[
+                styles.chatMessageText,
+                message.sent
+                  ? styles.sentMessageText
+                  : styles.receivedMessageText,
+              ]}
+            >
+              {message.text}
+            </Text>
+          </View>
+        ))}
       </ScrollView>
       <View style={styles.inputContainer}>
         <TextInput
+          value={sentMessage}
+          onChangeText={(text) => setSentMessage(text)}
+          onSubmitEditing={(event) =>
+            handleSentMessageChange(event.nativeEvent.text)
+          }
           style={styles.chatInput}
           placeholder="New Chat"
           returnKeyType="send"
@@ -64,28 +108,39 @@ const styles = StyleSheet.create({
     justifyContent: "flex-end",
   },
   chatsContainer: {
-    flex: 1,
+    flexGrow: 1,
     justifyContent: "flex-end",
-    alignItems: "flex-end",
     paddingBottom: 30,
     paddingHorizontal: 30,
   },
-  chatMessageContainer: {
-    // backgroundColor: "#F4F4F4",
+  sentMessage: {
     backgroundColor: Colors.primary,
+    alignSelf: "flex-end",
+  },
+  receivedMessage: {
+    backgroundColor: Colors.lightGrey,
+    alignSelf: "flex-start",
+  },
+  chatMessageContainer: {
     padding: 10,
     borderRadius: 15,
     marginBottom: 10,
+    width: "70%",
+  },
+  sentMessageText: {
+    color: "#fff",
+  },
+  receivedMessageText: {
+    color: "#0D0D0D",
   },
   chatMessageText: {
     fontFamily: Fonts.regular,
-    // color: "#0D0D0D",
-    color: "#fff",
+
     fontSize: 14,
   },
   inputContainer: {
     padding: 10,
-    backgroundColor: "#F4F4F4",
+    backgroundColor: Colors.lightGrey,
     marginHorizontal: 20,
   },
   chatInput: {
