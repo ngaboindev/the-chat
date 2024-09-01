@@ -1,17 +1,11 @@
+import NewChatTextInput from "@/components/NewChatTextInput";
 import UserWrapper from "@/components/UserWrapper";
 import { Colors } from "@/constants/Colors";
 import { Fonts } from "@/constants/Fonts";
 import { HeaderBackButton } from "@react-navigation/elements";
 import { useNavigation } from "expo-router";
 import { useEffect, useState } from "react";
-import {
-  SafeAreaView,
-  ScrollView,
-  StyleSheet,
-  Text,
-  TextInput,
-  View,
-} from "react-native";
+import { SafeAreaView, ScrollView, StyleSheet, Text, View } from "react-native";
 
 let messages = [
   {
@@ -59,6 +53,7 @@ const ChatScreen = () => {
       ...messagesList,
       { id: messagesList.length + 1, text, sent: true },
     ]);
+    setSentMessage("");
   };
 
   return (
@@ -85,18 +80,11 @@ const ChatScreen = () => {
           </View>
         ))}
       </ScrollView>
-      <View style={styles.inputContainer}>
-        <TextInput
-          value={sentMessage}
-          onChangeText={(text) => setSentMessage(text)}
-          onSubmitEditing={(event) =>
-            handleSentMessageChange(event.nativeEvent.text)
-          }
-          style={styles.chatInput}
-          placeholder="New Chat"
-          returnKeyType="send"
-        />
-      </View>
+      <NewChatTextInput
+        setSentMessage={setSentMessage}
+        sentMessage={sentMessage}
+        handleSentMessageChange={handleSentMessageChange}
+      />
     </SafeAreaView>
   );
 };
@@ -137,17 +125,6 @@ const styles = StyleSheet.create({
     fontFamily: Fonts.regular,
 
     fontSize: 14,
-  },
-  inputContainer: {
-    padding: 10,
-    backgroundColor: Colors.lightGrey,
-    marginHorizontal: 20,
-  },
-  chatInput: {
-    width: "100%",
-    padding: 3,
-    fontFamily: Fonts.medium,
-    color: "#0D0D0D",
   },
 });
 
