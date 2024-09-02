@@ -1,24 +1,40 @@
-import NewChatTextInput from "@/components/NewChatTextInput";
 import UserWrapper from "@/components/UserWrapper";
 import { Colors } from "@/constants/Colors";
 import { Fonts } from "@/constants/Fonts";
 import { HeaderBackButton } from "@react-navigation/elements";
 import { useNavigation } from "expo-router";
-import { useEffect, useState } from "react";
-import { SafeAreaView, ScrollView, StyleSheet, Text, View } from "react-native";
+import { useCallback, useEffect, useState } from "react";
+import { SafeAreaView, StyleSheet, View } from "react-native";
+import {
+  Bubble,
+  BubbleProps,
+  GiftedChat,
+  IMessage,
+} from "react-native-gifted-chat";
 
-let messages = [
-  {
-    id: 1,
-    text: "Hello Robert, this is amazing i can message u using bluetooth",
-    sent: true,
-  },
-  { id: 2, text: "Glad you like it! Let’s keep testing.", sent: false },
-];
+const CustomBubble = (props: BubbleProps<IMessage>) => {
+  return (
+    <Bubble
+      {...props}
+      textStyle={{
+        right: {
+          fontFamily: Fonts.regular,
+        },
+        left: {
+          fontFamily: Fonts.regular,
+        },
+      }}
+      wrapperStyle={{
+        right: {
+          backgroundColor: Colors.primary,
+        },
+      }}
+    />
+  );
+};
 
 const ChatScreen = () => {
-  const [sentMessage, setSentMessage] = useState<string>("");
-  const [messagesList, setMessagesList] = useState<any[]>([]);
+  const [messages, setMessages] = useState<IMessage[]>([]);
 
   const navigation = useNavigation();
 
@@ -44,46 +60,37 @@ const ChatScreen = () => {
   }, [navigation]);
 
   useEffect(() => {
-    setMessagesList(messages);
+    setMessages([
+      {
+        _id: 1,
+        text: "Hello developer",
+        createdAt: new Date(),
+        user: {
+          _id: 2,
+          name: "React Native",
+          avatar: "https://placeimg.com/140/140/any",
+        },
+        received: true,
+      },
+    ]);
   }, []);
 
-  const handleSentMessageChange = (text: string) => {
-    setSentMessage(text);
-    setMessagesList([
-      ...messagesList,
-      { id: messagesList.length + 1, text, sent: true },
-    ]);
-    setSentMessage("");
-  };
+  const onSend = useCallback((messages = []) => {
+    setMessages((previousMessages) =>
+      GiftedChat.append(previousMessages, messages),
+    );
+  }, []);
 
   return (
     <SafeAreaView style={styles.container}>
-      <ScrollView contentContainerStyle={styles.chatsContainer}>
-        {messagesList.map((message) => (
-          <View
-            key={message.id}
-            style={[
-              styles.chatMessageContainer,
-              message.sent ? styles.sentMessage : styles.receivedMessage,
-            ]}
-          >
-            <Text
-              style={[
-                styles.chatMessageText,
-                message.sent
-                  ? styles.sentMessageText
-                  : styles.receivedMessageText,
-              ]}
-            >
-              {message.text}
-            </Text>
-          </View>
-        ))}
-      </ScrollView>
-      <NewChatTextInput
-        setSentMessage={setSentMessage}
-        sentMessage={sentMessage}
-        handleSentMessageChange={handleSentMessageChange}
+      <View></View>
+      <GiftedChat
+        renderBubble={CustomBubble}
+        messages={messages}
+        onSend={(messages: never[]) => onSend(messages)}
+        user={{
+          _id: 1,
+        }}
       />
     </SafeAreaView>
   );
@@ -100,14 +107,6 @@ const styles = StyleSheet.create({
     justifyContent: "flex-end",
     paddingBottom: 30,
     paddingHorizontal: 30,
-  },
-  sentMessage: {
-    backgroundColor: Colors.primary,
-    alignSelf: "flex-end",
-  },
-  receivedMessage: {
-    backgroundColor: Colors.lightGrey,
-    alignSelf: "flex-start",
   },
   chatMessageContainer: {
     padding: 10,
