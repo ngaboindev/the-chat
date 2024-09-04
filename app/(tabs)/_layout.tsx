@@ -1,9 +1,15 @@
 import { Colors } from "@/constants/Colors";
 import AntDesign from "@expo/vector-icons/AntDesign";
-import { Link, Tabs } from "expo-router";
+import { Link, Redirect, Tabs } from "expo-router";
 import { Pressable } from "react-native";
 
 export default function TabsLayout() {
+  const isAuth = false;
+
+  if (!isAuth) {
+    return <Redirect href="/(auth)/signin" />;
+  }
+
   return (
     <Tabs
       screenOptions={{
