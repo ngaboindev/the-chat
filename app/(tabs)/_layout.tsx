@@ -1,12 +1,25 @@
 import { Colors } from "@/constants/Colors";
+import { supabase } from "@/lib/supabase";
 import AntDesign from "@expo/vector-icons/AntDesign";
+import { Session } from "@supabase/supabase-js";
 import { Link, Redirect, Tabs } from "expo-router";
+import { useEffect, useState } from "react";
 import { Pressable } from "react-native";
 
 export default function TabsLayout() {
-  const isAuth = false;
+  const [session, setSession] = useState<Session | null>(null);
 
-  if (!isAuth) {
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setSession(session);
+    });
+
+    supabase.auth.onAuthStateChange((_event, session) => {
+      setSession(session);
+    });
+  }, [session]);
+
+  if (!session) {
     return <Redirect href="/(auth)/signin" />;
   }
 
