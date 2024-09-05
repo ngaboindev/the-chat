@@ -1,3 +1,5 @@
+import { supabase } from "@/lib/supabase";
+import { useAuthStore } from "@/store/authStore";
 import { useFonts } from "expo-font";
 import { Stack } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
@@ -11,6 +13,26 @@ export default function RootLayout() {
     "SpaceGrotesk-Regular": require("../assets/fonts/SpaceGrotesk-Regular.ttf"),
     "SpaceGrotesk-Medium": require("../assets/fonts/SpaceGrotesk-Medium.ttf"),
   });
+
+  const initializeAuth = useAuthStore((state) => state.initializeAuth);
+  const setAuthState = useAuthStore((state) => state.setAuthState);
+
+  useEffect(() => {
+    // Initialize auth on mount
+    initializeAuth();
+
+    // Listen for auth state changes
+    const { data: authListener } = supabase.auth.onAuthStateChange(
+      (_event, session) => {
+        setAuthState(session);
+      },
+    );
+
+    // Cleanup listener on unmount
+    return () => {
+      authListener.subscription.unsubscribe();
+    };
+  }, [initializeAuth, setAuthState]);
 
   useEffect(() => {
     if (loaded || error) {

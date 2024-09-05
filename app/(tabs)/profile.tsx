@@ -1,6 +1,8 @@
 import Avatar from "@/components/Avatar";
 import { Colors } from "@/constants/Colors";
 import { Fonts } from "@/constants/Fonts";
+import { Styles } from "@/constants/Styles";
+import { useAuthStore } from "@/store/authStore";
 import { useState } from "react";
 import {
   Alert,
@@ -12,6 +14,7 @@ import {
 } from "react-native";
 
 const ProfileScreen = () => {
+  const { signOut } = useAuthStore();
   const [displayName, setDisplayName] = useState("");
 
   const avatarText = displayName
@@ -29,15 +32,25 @@ const ProfileScreen = () => {
   return (
     <View style={styles.container}>
       <Avatar text={avatarText} size="lg" />
-      <TextInput
-        placeholder="Display Name"
-        value={displayName}
-        onChangeText={(text) => setDisplayName(text)}
-        style={styles.input}
-      />
-      <View style={{ marginTop: 13 }}>
-        <Pressable style={styles.button} onPress={handleChangeDisplayName}>
-          <Text style={styles.buttonText}>Save</Text>
+      <View style={Styles.inputContainer}>
+        <TextInput
+          placeholder="Full Name"
+          value={displayName}
+          onChangeText={(text) => setDisplayName(text)}
+          style={Styles.input}
+        />
+      </View>
+      <View style={{ marginVertical: 13 }}>
+        <Pressable style={Styles.button} onPress={handleChangeDisplayName}>
+          <Text style={Styles.buttonText}>Save</Text>
+        </Pressable>
+      </View>
+      <View>
+        <Pressable
+          onPress={signOut}
+          style={[Styles.button, { backgroundColor: "red" }]}
+        >
+          <Text style={Styles.buttonText}>Sign Out</Text>
         </Pressable>
       </View>
     </View>

@@ -1,6 +1,6 @@
 import { Fonts } from "@/constants/Fonts";
 import { Styles } from "@/constants/Styles";
-import { supabase } from "@/lib/supabase";
+import { useAuthStore } from "@/store/authStore";
 import { Link, useRouter } from "expo-router";
 import { useState } from "react";
 import { Alert, Pressable, Text, TextInput, View } from "react-native";
@@ -12,47 +12,37 @@ type Props = {
 const AuthForm = ({ type }: Props) => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [isLoading, setIsLoading] = useState(false);
+
+  const { signIn, signUp, loading } = useAuthStore();
 
   const router = useRouter();
 
-  const signUpHandler = async () => {
+  const validateForm = () => {
     if (!email || !password) {
-      return Alert.alert("Error", "Please fill all fields");
+      Alert.alert("Error", "Please fill all fields!");
+      return false;
     }
+    return true;
+  };
 
-    setIsLoading(true);
-    const {
-      data: { session },
-      error,
-    } = await supabase.auth.signUp({
-      email,
-      password,
-    });
-
-    if (error) {
-      Alert.alert("Error", error.message);
+  const signUpHandler = async () => {
+    if (!validateForm()) return;
+    try {
+      signUp(email, password);
+      return router.replace("/(auth)/signin");
+    } catch (error: any) {
+      Alert.alert("Error", error?.message || "An error occurred");
     }
-
-    if (!session)
-      Alert.alert("Please check your inbox for email verification!");
-
-    setIsLoading(true);
   };
 
   const signInHandler = async () => {
-    setIsLoading(true);
-    const { error, data } = await supabase.auth.signInWithPassword({
-      email: email,
-      password: password,
-    });
-
-    if (!error && data) {
+    if (!validateForm()) return;
+    try {
+      signIn(email, password);
       return router.replace("/(tabs)/");
+    } catch (error: any) {
+      Alert.alert("Error", error?.message || "An error occurred");
     }
-
-    if (error) Alert.alert(error.message);
-    setIsLoading(false);
   };
 
   const submitHandler = () => {
@@ -88,7 +78,7 @@ const AuthForm = ({ type }: Props) => {
         style={({ pressed }) => [Styles.button, pressed && { opacity: 0.5 }]}
       >
         <Text style={Styles.buttonText}>
-          {isLoading ? "Loading..." : type === "signup" ? "Register" : "Login"}
+          {loading ? "Loading..." : type === "signup" ? "Register" : "Login"}
         </Text>
       </Pressable>
       <Link
