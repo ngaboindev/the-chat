@@ -28,7 +28,7 @@ const AuthForm = ({ type }: Props) => {
   const signUpHandler = async () => {
     if (!validateForm()) return;
     try {
-      signUp(email, password);
+      await signUp(email, password);
       return router.replace("/(auth)/signin");
     } catch (error: any) {
       Alert.alert("Error", error?.message || "An error occurred");
