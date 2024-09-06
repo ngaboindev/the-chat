@@ -2,8 +2,9 @@ import Avatar from "@/components/Avatar";
 import { Colors } from "@/constants/Colors";
 import { Fonts } from "@/constants/Fonts";
 import { Styles } from "@/constants/Styles";
+import { supabase } from "@/lib/supabase";
 import { useAuthStore } from "@/store/authStore";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   Alert,
   Pressable,
@@ -14,19 +15,87 @@ import {
 } from "react-native";
 
 const ProfileScreen = () => {
-  const { signOut } = useAuthStore();
-  const [displayName, setDisplayName] = useState("");
+  const { signOut, user, session } = useAuthStore();
+  const [fullName, setFullName] = useState("");
+  const [userWebsite, setUserWebsite] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
 
-  const avatarText = displayName
-    ? `${displayName.split(" ")[0]?.[0] ?? ""}${displayName.split(" ")[1]?.[0] ?? ""}`
+  const avatarText = fullName
+    ? `${fullName.split(" ")[0]?.[0] ?? ""}${fullName.split(" ")[1]?.[0] ?? ""}`
     : "";
 
-  const handleChangeDisplayName = () => {
-    if (!displayName) {
-      Alert.alert("Error", "Please enter a display name");
-      return;
+  useEffect(() => {
+    if (session) getProfile();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [session]);
+
+  const getProfile = async () => {
+    try {
+      if (!session?.user) throw new Error("No user on the session!");
+
+      console.log("Fetching profile for user ID:", user?.id);
+
+      const { data, error } = await supabase
+        .from("profiles")
+        .select("full_name, website")
+        .eq("id", user?.id)
+        .single();
+
+      console.log("Supabase response:", { data, error });
+
+      if (error) {
+        throw error;
+      }
+
+      if (data) {
+        setFullName(data.full_name);
+        setUserWebsite(data.website);
+      } else {
+        console.log("No data found for user ID:", user?.id);
+      }
+    } catch (error) {
+      if (error instanceof Error) {
+        Alert.alert("Error", error.message);
+      }
     }
-    Alert.alert("Changed");
+  };
+
+  const updateProfile = async () => {
+    if (!fullName) {
+      return Alert.alert("Error", "Full name is required");
+    }
+
+    try {
+      setIsLoading(true);
+      if (!session?.user) throw new Error("No user on the session!");
+
+      console.log("Updating profile for user ID:", user?.id);
+
+      const res = await supabase.from("profiles").upsert({
+        id: user?.id,
+        full_name: fullName,
+        website: userWebsite,
+        updated_at: new Date(),
+      });
+
+      console.log("Supabase response:", res);
+
+      if (res.error) {
+        throw res.error;
+      }
+
+      if (res.status === 201 || res.status === 200) {
+        Alert.alert("Success", "Profile updated successfully");
+      } else {
+        console.log("No data returned after update for user ID:", user?.id);
+      }
+    } catch (error) {
+      if (error instanceof Error) {
+        Alert.alert("Error", error.message);
+      }
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -35,17 +104,27 @@ const ProfileScreen = () => {
       <View style={Styles.inputContainer}>
         <TextInput
           placeholder="Full Name"
-          value={displayName}
-          onChangeText={(text) => setDisplayName(text)}
+          value={fullName}
+          onChangeText={(text) => setFullName(text)}
           style={Styles.input}
         />
       </View>
-      <View style={{ marginVertical: 13 }}>
-        <Pressable style={Styles.button} onPress={handleChangeDisplayName}>
-          <Text style={Styles.buttonText}>Save</Text>
+      <View style={Styles.inputContainer}>
+        <TextInput
+          placeholder="Website"
+          value={userWebsite}
+          onChangeText={(text) => setUserWebsite(text)}
+          style={Styles.input}
+        />
+      </View>
+      <View style={{ marginVertical: 13, marginBottom: 40, width: "100%" }}>
+        <Pressable onPress={updateProfile} style={Styles.button}>
+          <Text style={Styles.buttonText}>
+            {isLoading ? "Updating..." : "Update Profile"}
+          </Text>
         </Pressable>
       </View>
-      <View>
+      <View style={{ width: "100%" }}>
         <Pressable
           onPress={signOut}
           style={[Styles.button, { backgroundColor: "red" }]}
