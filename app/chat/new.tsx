@@ -1,14 +1,16 @@
 import UserItem from "@/components/UserItem";
 import { Fonts } from "@/constants/Fonts";
+import { Styles } from "@/constants/Styles";
 import AntDesign from "@expo/vector-icons/AntDesign";
 import { Link, useRouter } from "expo-router";
-import React from "react";
+import React, { useState } from "react";
 import {
   FlatList,
   Pressable,
   SafeAreaView,
   StyleSheet,
   Text,
+  TextInput,
   View,
 } from "react-native";
 
@@ -37,6 +39,8 @@ const usersList = [
 
 const NewChatScreen = () => {
   const router = useRouter();
+  const [search, setSearch] = useState("");
+
   const handleNavigateUserToChat = (id: string) => {
     router.back();
     router.navigate(`/chat/${id}`);
@@ -54,6 +58,16 @@ const NewChatScreen = () => {
               <AntDesign name="closecircle" size={24} color="black" />
             </Pressable>
           </Link>
+        </View>
+        <View>
+          <View style={Styles.inputContainer}>
+            <TextInput
+              value={search}
+              onChangeText={setSearch}
+              style={Styles.input}
+              placeholder="Search user"
+            />
+          </View>
         </View>
         {/* users list */}
         <FlatList
