@@ -1,8 +1,9 @@
 import UserWrapper from "@/components/UserWrapper";
 import { Colors } from "@/constants/Colors";
 import { Fonts } from "@/constants/Fonts";
+import { supabase } from "@/lib/supabase";
 import { HeaderBackButton } from "@react-navigation/elements";
-import { useNavigation } from "expo-router";
+import { useLocalSearchParams, useNavigation } from "expo-router";
 import { useCallback, useEffect, useState } from "react";
 import { SafeAreaView, StyleSheet, View } from "react-native";
 import {
@@ -34,9 +35,39 @@ const CustomBubble = (props: BubbleProps<IMessage>) => {
 };
 
 const ChatScreen = () => {
+  const [user, setUser] = useState<any>(null);
+  const params = useLocalSearchParams();
   const [messages, setMessages] = useState<IMessage[]>([]);
 
   const navigation = useNavigation();
+
+  console.log(params.chatId);
+
+  const getSingleProfile = async () => {
+    try {
+      const { data, error } = await supabase
+        .from("profiles")
+        .select("*")
+        .eq("id", params.chatId)
+        .single();
+
+      if (error) {
+        throw error;
+      }
+
+      if (data) {
+        setUser(data);
+      } else {
+        console.log("No data found for user ID:", params.chatId);
+      }
+    } catch (error) {
+      console.log("error getting users", error);
+    }
+  };
+
+  useEffect(() => {
+    getSingleProfile();
+  }, []);
 
   useEffect(() => {
     navigation.setOptions({
@@ -53,11 +84,11 @@ const ChatScreen = () => {
               labelVisible={false}
             />
           )}
-          <UserWrapper />
+          <UserWrapper name={user?.full_name || ""} />
         </View>
       ),
     });
-  }, [navigation]);
+  }, [navigation, user]);
 
   useEffect(() => {
     setMessages([

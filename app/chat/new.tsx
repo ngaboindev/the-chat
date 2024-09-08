@@ -1,9 +1,11 @@
 import UserItem from "@/components/UserItem";
 import { Fonts } from "@/constants/Fonts";
 import { Styles } from "@/constants/Styles";
+import { supabase } from "@/lib/supabase";
+import { useAuthStore } from "@/store/authStore";
 import AntDesign from "@expo/vector-icons/AntDesign";
 import { Link, useRouter } from "expo-router";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   FlatList,
   Pressable,
@@ -14,36 +16,33 @@ import {
   View,
 } from "react-native";
 
-const usersList = [
-  {
-    id: 1,
-    name: "John Doe",
-    website: "johndoe.com",
-  },
-  {
-    id: 2,
-    name: "Jane Doe",
-    website: "janedoe.com",
-  },
-  {
-    id: 3,
-    name: "John Smith",
-    website: "johnsmith.com",
-  },
-  {
-    id: 4,
-    name: "Jane Smith",
-    website: "janesmith.com",
-  },
-];
-
 const NewChatScreen = () => {
+  const [users, setUsers] = useState<null | any[]>(null);
   const router = useRouter();
   const [search, setSearch] = useState("");
+  const { session } = useAuthStore();
 
   const handleNavigateUserToChat = (id: string) => {
     router.back();
     router.navigate(`/chat/${id}`);
+  };
+
+  useEffect(() => {
+    if (session) getUsers();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [session]);
+
+  const getUsers = async () => {
+    try {
+      if (!session) throw new Error("No session found!");
+      const { data, error } = await supabase.from("profiles").select("*");
+      setUsers(data);
+      if (error) {
+        throw error;
+      }
+    } catch (error) {
+      console.log("error getting users", error);
+    }
   };
 
   return (
@@ -71,12 +70,12 @@ const NewChatScreen = () => {
         </View>
         {/* users list */}
         <FlatList
-          data={usersList}
+          data={users}
           keyExtractor={(item) => item.id.toString()}
           renderItem={({ item }) => (
             <UserItem
-              name={item.name}
-              website={item.website}
+              name={item.full_name || "no name"}
+              website={item.website || "no website"}
               onPress={() => handleNavigateUserToChat(item.id.toString())}
             />
           )}

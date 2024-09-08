@@ -2,13 +2,13 @@ import { Fonts } from "@/constants/Fonts";
 import { StyleSheet, Text, View } from "react-native";
 
 type Props = {
-  status?: string;
+  name?: string;
 };
 
-const UserWrapper = ({ status }: Props) => {
+const UserWrapper = ({ name = "Me" }: Props) => {
   return (
     <View>
-      <Text style={styles.name}>Robert Ngabo</Text>
+      <Text style={styles.name}>{name}</Text>
     </View>
   );
 };
