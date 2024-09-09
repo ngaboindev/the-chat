@@ -41,8 +41,6 @@ const ChatScreen = () => {
 
   const navigation = useNavigation();
 
-  console.log(params.chatId);
-
   const getSingleProfile = async () => {
     try {
       const { data, error } = await supabase
@@ -106,7 +104,45 @@ const ChatScreen = () => {
     ]);
   }, []);
 
+  const getMessages = async () => {
+    try {
+      await supabase
+        .from("messages")
+        .select("*")
+        .eq("user_id", params.chatId)
+        .order("createdAt", { ascending: true });
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  const saveMessage = async (message: IMessage) => {
+    try {
+      const { data, error } = await supabase.from("messages").insert([
+        {
+          message: message.text,
+          user_id: params.chatId,
+          createdAt: message.createdAt,
+          text: message.text,
+          user: {
+            _id: params.chatId,
+            name: user?.full_name,
+          },
+        },
+      ]);
+
+      if (error) {
+        throw error;
+      }
+
+      console.log("message saved", data);
+    } catch (error) {
+      console.log("error saving message", error);
+    }
+  };
+
   const onSend = useCallback((messages = []) => {
+    saveMessage(messages[0]);
     setMessages((previousMessages) =>
       GiftedChat.append(previousMessages, messages),
     );
