@@ -45,6 +45,13 @@ const NewChatScreen = () => {
     }
   };
 
+  const filteredUsers = (users: any[], search: string) => {
+    if (!search) return users;
+    return users.filter((user) =>
+      user.full_name.toLowerCase().includes(search.toLowerCase()),
+    );
+  };
+
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.wrapper}>
@@ -70,7 +77,7 @@ const NewChatScreen = () => {
         </View>
         {/* users list */}
         <FlatList
-          data={users}
+          data={filteredUsers(users || [], search)}
           keyExtractor={(item) => item.id.toString()}
           renderItem={({ item }) => (
             <UserItem
