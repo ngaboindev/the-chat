@@ -2,6 +2,7 @@ import UserWrapper from "@/components/UserWrapper";
 import { Colors } from "@/constants/Colors";
 import { Fonts } from "@/constants/Fonts";
 import { supabase } from "@/lib/supabase";
+import { useAuthStore } from "@/store/authStore";
 import { HeaderBackButton } from "@react-navigation/elements";
 import { useLocalSearchParams, useNavigation } from "expo-router";
 import { useCallback, useEffect, useState } from "react";
@@ -35,18 +36,44 @@ const CustomBubble = (props: BubbleProps<IMessage>) => {
 };
 
 const ChatScreen = () => {
+  const { user: authUser } = useAuthStore();
   const [user, setUser] = useState<any>(null);
   const params = useLocalSearchParams();
   const [messages, setMessages] = useState<IMessage[]>([]);
 
+  const receiverId = params.chatId;
+  const senderId = authUser?.id;
+
   const navigation = useNavigation();
+
+  const fetchMessage = async () => {
+    const { data, error } = await supabase
+      .from("messages")
+      .select("*")
+      .eq("sender_id", authUser?.id)
+      .eq("receiver_id", receiverId)
+      .order("created_at", { ascending: false });
+    console.log(data);
+    if (!error) {
+      const formattedMessages = data.map((msg) => ({
+        _id: msg.id,
+        text: msg.content,
+        createdAt: new Date(msg.created_at),
+        user: {
+          _id: msg.sender_id,
+          name: user?.fullname || "User",
+        },
+      }));
+      setMessages(formattedMessages);
+    }
+  };
 
   const getSingleProfile = async () => {
     try {
       const { data, error } = await supabase
         .from("profiles")
         .select("*")
-        .eq("id", params.chatId)
+        .eq("id", receiverId)
         .single();
 
       if (error) {
@@ -55,8 +82,9 @@ const ChatScreen = () => {
 
       if (data) {
         setUser(data);
+        fetchMessage();
       } else {
-        console.log("No data found for user ID:", params.chatId);
+        console.log("No data found for user ID:", receiverId);
       }
     } catch (error) {
       console.log("error getting users", error);
@@ -104,48 +132,23 @@ const ChatScreen = () => {
     ]);
   }, []);
 
-  const getMessages = async () => {
-    try {
-      await supabase
-        .from("messages")
-        .select("*")
-        .eq("user_id", params.chatId)
-        .order("createdAt", { ascending: true });
-    } catch (error) {
-      console.log(error);
-    }
-  };
-
-  const saveMessage = async (message: IMessage) => {
-    try {
-      const { data, error } = await supabase.from("messages").insert([
-        {
-          message: message.text,
-          user_id: params.chatId,
-          createdAt: message.createdAt,
-          text: message.text,
-          user: {
-            _id: params.chatId,
-            name: user?.full_name,
-          },
-        },
-      ]);
-
-      if (error) {
-        throw error;
-      }
-
-      console.log("message saved", data);
-    } catch (error) {
-      console.log("error saving message", error);
-    }
-  };
-
-  const onSend = useCallback((messages = []) => {
-    saveMessage(messages[0]);
+  const onSend = useCallback(async (newMessages: IMessage[] = []) => {
+    const newMessage = newMessages[0];
     setMessages((previousMessages) =>
-      GiftedChat.append(previousMessages, messages),
+      GiftedChat.append(previousMessages, newMessages),
     );
+
+    const { data, error } = await supabase.from("messages").insert([
+      {
+        sender_id: senderId,
+        receiver_id: receiverId,
+        content: newMessage?.text,
+      },
+    ]);
+
+    if (error) {
+      console.error("Error sending message:", error);
+    }
   }, []);
 
   return (
