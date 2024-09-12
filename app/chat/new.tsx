@@ -1,4 +1,5 @@
 import UserItem from "@/components/UserItem";
+import { Colors } from "@/constants/Colors";
 import { Fonts } from "@/constants/Fonts";
 import { Styles } from "@/constants/Styles";
 import { supabase } from "@/lib/supabase";
@@ -7,6 +8,7 @@ import AntDesign from "@expo/vector-icons/AntDesign";
 import { Link, useRouter } from "expo-router";
 import React, { useEffect, useState } from "react";
 import {
+  ActivityIndicator,
   FlatList,
   Pressable,
   SafeAreaView,
@@ -17,6 +19,7 @@ import {
 } from "react-native";
 
 const NewChatScreen = () => {
+  const [isLoading, setIsLoading] = useState(false);
   const [users, setUsers] = useState<null | any[]>(null);
   const router = useRouter();
   const [search, setSearch] = useState("");
@@ -35,6 +38,7 @@ const NewChatScreen = () => {
   const getUsers = async () => {
     try {
       if (!session) throw new Error("No session found!");
+      setIsLoading(true);
       const { data, error } = await supabase.from("profiles").select("*");
       setUsers(data);
       if (error) {
@@ -42,6 +46,8 @@ const NewChatScreen = () => {
       }
     } catch (error) {
       console.log("error getting users", error);
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -75,6 +81,17 @@ const NewChatScreen = () => {
             />
           </View>
         </View>
+        {isLoading && (
+          <View
+            style={{
+              paddingVertical: 10,
+              alignItems: "center",
+            }}
+          >
+            <ActivityIndicator size={"small"} color={Colors.primary} />
+            <Text>Loading...</Text>
+          </View>
+        )}
         {/* users list */}
         <FlatList
           data={filteredUsers(users || [], search)}
