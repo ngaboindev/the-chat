@@ -91,19 +91,13 @@ const ChatScreen = () => {
     }
   };
 
-  useEffect(() => {
+  const getProfile = useCallback(() => {
     getSingleProfile();
   }, []);
-
-  useEffect(() => {
+  const setupHeader = useCallback(() => {
     navigation.setOptions({
       headerLeft: () => (
-        <View
-          style={{
-            flexDirection: "row",
-            alignItems: "center",
-          }}
-        >
+        <View style={{ flexDirection: "row", alignItems: "center" }}>
           {navigation.canGoBack() && (
             <HeaderBackButton
               onPress={() => navigation.goBack()}
@@ -115,8 +109,7 @@ const ChatScreen = () => {
       ),
     });
   }, [navigation, user]);
-
-  useEffect(() => {
+  const initializeMessages = useCallback(() => {
     setMessages([
       {
         _id: 1,
@@ -130,7 +123,13 @@ const ChatScreen = () => {
         received: true,
       },
     ]);
-  }, []);
+  }, [setMessages]);
+
+  useEffect(() => {
+    getProfile();
+    setupHeader();
+    initializeMessages();
+  }, [getProfile, setupHeader, initializeMessages]);
 
   const onSend = useCallback(async (newMessages: IMessage[] = []) => {
     const newMessage = newMessages[0];
