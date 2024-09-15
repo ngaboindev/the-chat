@@ -6,7 +6,12 @@ import { useAuthStore } from "@/store/authStore";
 import { HeaderBackButton } from "@react-navigation/elements";
 import { useLocalSearchParams, useNavigation } from "expo-router";
 import { useCallback, useEffect, useState } from "react";
-import { SafeAreaView, StyleSheet, View } from "react-native";
+import {
+  ActivityIndicator,
+  SafeAreaView,
+  StyleSheet,
+  View,
+} from "react-native";
 import {
   Bubble,
   BubbleProps,
@@ -38,12 +43,12 @@ const CustomBubble = (props: BubbleProps<IMessage>) => {
 const ChatScreen = () => {
   const { user: authUser } = useAuthStore();
   const [user, setUser] = useState<any>(null);
-  const params = useLocalSearchParams();
   const [messages, setMessages] = useState<IMessage[]>([]);
+  const [loading, setLoading] = useState(true); // Loading state
+  const params = useLocalSearchParams();
 
   const receiverId = params.chatId;
   const senderId = authUser?.id;
-
   const navigation = useNavigation();
 
   const fetchMessage = async () => {
@@ -53,7 +58,7 @@ const ChatScreen = () => {
       .eq("sender_id", authUser?.id)
       .eq("receiver_id", receiverId)
       .order("created_at", { ascending: false });
-    console.log(data);
+
     if (!error) {
       const formattedMessages = data.map((msg) => ({
         _id: msg.id,
@@ -82,7 +87,8 @@ const ChatScreen = () => {
 
       if (data) {
         setUser(data);
-        fetchMessage();
+        await fetchMessage(); // Ensure messages are fetched after profile
+        setLoading(false); // Data is loaded, set loading to false
       } else {
         console.log("No data found for user ID:", receiverId);
       }
@@ -94,6 +100,7 @@ const ChatScreen = () => {
   const getProfile = useCallback(() => {
     getSingleProfile();
   }, []);
+
   const setupHeader = useCallback(() => {
     navigation.setOptions({
       headerLeft: () => (
@@ -109,27 +116,11 @@ const ChatScreen = () => {
       ),
     });
   }, [navigation, user]);
-  const initializeMessages = useCallback(() => {
-    setMessages([
-      {
-        _id: 1,
-        text: "Hello developer",
-        createdAt: new Date(),
-        user: {
-          _id: 2,
-          name: "React Native",
-          avatar: "https://placeimg.com/140/140/any",
-        },
-        received: true,
-      },
-    ]);
-  }, [setMessages]);
 
   useEffect(() => {
     getProfile();
     setupHeader();
-    initializeMessages();
-  }, [getProfile, setupHeader, initializeMessages]);
+  }, [getProfile, setupHeader]);
 
   const onSend = useCallback(async (newMessages: IMessage[] = []) => {
     const newMessage = newMessages[0];
@@ -149,6 +140,14 @@ const ChatScreen = () => {
       console.error("Error sending message:", error);
     }
   }, []);
+
+  if (loading) {
+    return (
+      <SafeAreaView style={styles.loadingContainer}>
+        <ActivityIndicator size="large" color={Colors.primary} />
+      </SafeAreaView>
+    );
+  }
 
   return (
     <SafeAreaView style={styles.container}>
@@ -170,6 +169,11 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: "#FFFFFF",
     justifyContent: "flex-end",
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
   },
   chatsContainer: {
     flexGrow: 1,
